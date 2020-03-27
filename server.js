@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const express = require('express')
-const UUID = require('uuid')
 const morgan = require('morgan')
 const app = express()
 const store = require('./store')
