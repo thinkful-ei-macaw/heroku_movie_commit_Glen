@@ -62,6 +62,6 @@ app.use((error, req, res, next) => {
     }
     res.status(500).json(response)
 })
-const PORT = process.env.port || 8000
+const PORT = process.ENV.PORT || 8000
 
 app.listen(PORT);
