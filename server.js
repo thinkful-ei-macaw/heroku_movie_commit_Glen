@@ -1,17 +1,19 @@
 require('dotenv').config();
 
 const express = require('express')
+const UUID = require('uuid')
 const morgan = require('morgan')
-console.log(process.env.API_TOKEN)
 const app = express()
 const store = require('./store')
 const cors = require('cors')
 
 // const API_TOKEN = process.env.API_TOKEN
 
+const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common'
+app.use(morgan(morganSetting))
 
-app.use(morgan('dev'))
 app.use(cors())
+
 
 function validateBearerToken(req, res, next) {
     const apiToken = process.env.API_TOKEN
@@ -33,11 +35,11 @@ function handleGetTypes(req, res) {
     // When searching by average vote, users are searching for Movies with an avg_vote that is greater than or equal to the supplied number.
 
     for (let key in req.query) {
-        console.log(key, filterData.length)
+
 
         if (key === 'avg_vote') {
             filterData = filterData.filter(movie => movie.avg_vote >= parseFloat(req.query.avg_vote))
-            console.log("After vote filtering", filterData.length)
+
         } else {
             filterData = filterData.filter(movie => movie[key].toLowerCase() === req.query[key].toLowerCase())
         }
@@ -51,9 +53,16 @@ function handleGetTypes(req, res) {
 app.get('/movie', validateBearerToken, handleGetTypes)
 
 
-const PORT = 8000
-// const PORT = process.env.port || 8000
-
-app.listen(PORT, () => {
-    console.log(`Server listening at http://localhost:${PORT}`)
+// const PORT = 8000
+app.use((error, req, res, next) => {
+    let response
+    if (process.env.NODE_ENV === 'production') {
+        response = { error: { message: 'server error' } }
+    } else {
+        response = { error }
+    }
+    res.status(500).json(response)
 })
+const PORT = process.env.port || 8000
+
+app.listen(PORT);
